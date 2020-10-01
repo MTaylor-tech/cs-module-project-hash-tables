@@ -1,6 +1,24 @@
-def word_count(s):
-    # Your code here
+IGNORE = ['"', ':', ';', '.', '-', '+', '=', '/', '\\', '|', '[', ']', '{', '}',
+          '(', ')', '*', '^', '&',',']
 
+WHITESPACE = ['\r', '\n', '\t']
+
+def word_count(s):
+    s = s.lower()
+    s = ''.join(c for c in s if c not in IGNORE)
+    for c in WHITESPACE:
+        s = s.replace(c," ")
+    arr = s.split(" ")
+    wordbank = {}
+    for word in arr:
+        if word == '':
+            pass
+        elif wordbank.get(word) is None:
+            wordbank.update({word:1})
+        else:
+            count = wordbank.get(word)
+            wordbank.update({word:count+1})
+    return wordbank
 
 
 if __name__ == "__main__":
