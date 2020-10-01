@@ -21,6 +21,9 @@ class HashTable:
     """
 
     def __init__(self, capacity):
+        self.entries = [None] * capacity
+        self.capacity = capacity
+        self.num_entries = 0
         # Your code here
 
 
@@ -34,6 +37,7 @@ class HashTable:
 
         Implement this.
         """
+        return self.capacity
         # Your code here
 
 
@@ -43,6 +47,7 @@ class HashTable:
 
         Implement this.
         """
+        return self.num_entries/self.capacity
         # Your code here
 
 
@@ -52,8 +57,11 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
-
-        # Your code here
+        hash = 14695981039346656037
+        for char in key:
+            hash = hash * 1099511628211
+            hash = hash ^ ord(char)
+        return hash
 
 
     def djb2(self, key):
@@ -62,7 +70,10 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
+        hash = 5381
+        for char in key:
+            hash = (( hash << 5) + hash) + ord(char)
+        return hash & 0xFFFFFFFF
 
 
     def hash_index(self, key):
@@ -73,7 +84,7 @@ class HashTable:
         #return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
-    def put(self, key, value):
+    def put(self, key, value, storage=None):
         """
         Store the value with the given key.
 
@@ -81,6 +92,25 @@ class HashTable:
 
         Implement this.
         """
+        if storage is None:
+            storage = self.entries
+        hI = self.hash_index(key)
+        if storage[hI] is None:
+            storage[hI] = HashTableEntry(key,value)
+            self.num_entries += 1
+        else:
+            stored = False
+            bucket = storage[hI]
+            while not stored:
+                if bucket.key == key:
+                    bucket.value = value
+                    stored = True
+                elif bucket.next is None:
+                    bucket.next = HashTableEntry(key,value)
+                    self.num_entries += 1
+                    stored = True
+                else:
+                    bucket = bucket.next
         # Your code here
 
 
@@ -92,6 +122,42 @@ class HashTable:
 
         Implement this.
         """
+        hI = self.hash_index(key)
+        if self.entries[hI] is None:
+            print("No entry found with key {} - {}".format(key,hI))
+            return None
+        else:
+            if self.entries[hI].key == key:
+                if self.entries[hI].next is not None:
+                    self.entries[hI] = self.entries[hI].next
+                else:
+                    self.entries[hI] = None
+                self.num_entries -= 1
+                print("Removed hi")
+                return None
+            elif self.entries[hI].next is None:
+                print("No entry found with key {} - {}".format(key,hI))
+                return None
+            else:
+                parent = self.entries[hI]
+                child = parent.next
+                while True:
+                    if child.key == key:
+                        if child.next is not None:
+                            parent.next = child.next
+                        else:
+                            parent.next = None
+                        self.num_entries -= 1
+                        print("Removed pc")
+                        return None
+                    elif child.next is None:
+                        print("No entry found with key {} - pc".format(key))
+                        return None
+                    else:
+                        parent = child
+                        child = child.next
+
+
         # Your code here
 
 
@@ -103,8 +169,41 @@ class HashTable:
 
         Implement this.
         """
+        hI = self.hash_index(key)
+        if self.entries[hI] is None:
+            return None
+        else:
+            if self.entries[hI].key == key:
+                return self.entries[hI].value
+            elif self.entries[hI].next is None:
+                    return None
+            else:
+                found = False
+                bucket = self.entries[hI].next
+                while not found:
+                    if bucket.key == key:
+                        return bucket.value
+                    else:
+                        if bucket.next is None:
+                            return None
+                        else:
+                            bucket = bucket.next
         # Your code here
-
+        #
+    def get_all(self):
+        """
+        Retrieves all entries as a k,v tuple in a list
+        """
+        all_array = []
+        for i in range(len(self.entries)):
+            if self.entries[i] is not None:
+                all_array.append((self.entries[i].key,self.entries[i].value))
+                if self.entries[i].next is not None:
+                    bucket = self.entries[i].next
+                    while bucket is not None:
+                        all_array.append((bucket.key,bucket.value))
+                        bucket = bucket.next
+        return all_array
 
     def resize(self, new_capacity):
         """
@@ -113,6 +212,12 @@ class HashTable:
 
         Implement this.
         """
+        self.capacity = new_capacity
+        new_store = [None] * new_capacity
+        self.num_entries = 0
+        for k,v in self.get_all():
+            self.put(k,v,new_store)
+        self.entries = new_store
         # Your code here
 
 
