@@ -92,8 +92,10 @@ class HashTable:
 
         Implement this.
         """
+        can_resize = False
         if storage is None:
             storage = self.entries
+            can_resize = True
         hI = self.hash_index(key)
         if storage[hI] is None:
             storage[hI] = HashTableEntry(key,value)
@@ -111,7 +113,8 @@ class HashTable:
                     stored = True
                 else:
                     bucket = bucket.next
-        # Your code here
+        if self.get_load_factor() > 0.7 and can_resize:
+            self.resize(self.calc_new_cap())
 
 
     def delete(self, key):
@@ -133,7 +136,6 @@ class HashTable:
                 else:
                     self.entries[hI] = None
                 self.num_entries -= 1
-                print("Removed hi")
                 return None
             elif self.entries[hI].next is None:
                 print("No entry found with key {} - {}".format(key,hI))
@@ -148,17 +150,16 @@ class HashTable:
                         else:
                             parent.next = None
                         self.num_entries -= 1
-                        print("Removed pc")
                         return None
                     elif child.next is None:
-                        print("No entry found with key {} - pc".format(key))
+                        print("No entry found with key {}".format(key))
                         return None
                     else:
                         parent = child
                         child = child.next
+        if self.get_load_factor() < 0.2:
+            self.resize(self.calc_new_cap(up=False))
 
-
-        # Your code here
 
 
     def get(self, key):
@@ -188,8 +189,7 @@ class HashTable:
                             return None
                         else:
                             bucket = bucket.next
-        # Your code here
-        #
+
     def get_all(self):
         """
         Retrieves all entries as a k,v tuple in a list
@@ -218,7 +218,15 @@ class HashTable:
         for k,v in self.get_all():
             self.put(k,v,new_store)
         self.entries = new_store
-        # Your code here
+
+    def calc_new_cap(self, up=True):
+        if up:
+            return self.capacity * 2
+        else:
+            c = self.capacity//2
+            if c < MIN_CAPACITY:
+                c = MIN_CAPACITY
+            return c
 
 
 
