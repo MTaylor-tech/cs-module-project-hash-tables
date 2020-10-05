@@ -1,10 +1,12 @@
 import random
 import math
 
-powd = {}
+
 facd = {}
 divd = {}
 modd = {}
+fd = {}
+
 
 def djb2(key):
     hash = 5381
@@ -12,13 +14,14 @@ def djb2(key):
         hash = (( hash << 5) + hash) + ord(char)
     return hash & 0xFFFFFFFF
 
+
 def slowfun_too_slow(x, y):
     v = math.pow(x, y)
     v = math.factorial(v)
     v //= (x + y)
     v %= 982451653
-
     return v
+
 
 def slowfun(x, y):
     """
@@ -27,11 +30,10 @@ def slowfun(x, y):
     """
     v = 0
     hashd = djb2(f"{x},{y}")
-    if powd.get(hashd) is not None:
-        v = powd.get(hashd)
+    if fd.get(hashd) is not None:
+        return fd.get(hashd)
     else:
         v = math.pow(x,y)
-        powd.update({hashd:v})
     if facd.get(v) is not None:
         v = facd.get(v)
     else:
@@ -49,6 +51,7 @@ def slowfun(x, y):
         z = v
         v %= 982451653
         modd.update({z:v})
+        fd.update({hashd:v})
     return v
 
 

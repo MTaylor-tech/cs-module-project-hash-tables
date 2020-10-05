@@ -1,14 +1,11 @@
 IGNORE = ['"', ':', ';', '.', '-', '+', '=', '/', '\\', '|', '[', ']', '{', '}',
           '(', ')', '*', '^', '&',',']
 
-WHITESPACE = ['\r', '\n', '\t']
 
 def word_count(s):
     s = s.lower()
     s = ''.join(c for c in s if c not in IGNORE)
-    for c in WHITESPACE:
-        s = s.replace(c," ")
-    arr = s.split(" ")
+    arr = s.split()
     wordbank = {}
     for word in arr:
         if word == '':
