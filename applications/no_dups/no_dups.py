@@ -1,5 +1,13 @@
 def no_dups(s):
-    # Your code here
+    # a = set(s.split()) #removes order
+    a = s.split()
+    d = {}
+    b = []
+    for w in a:
+        if not d.get(w):
+            d[w] = True
+            b.append(w)
+    return " ".join(b)
 
 
 
